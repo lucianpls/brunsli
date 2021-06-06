@@ -11,7 +11,7 @@
 
 namespace brunsli {
 
-void ComputeLehmerCode(const uint32_t* sigma, const size_t len,
+void ComputeLehmerCode(const uint32_t* sigma, size_t len,
                        uint32_t* code) {
   std::vector<uint32_t> items(len);
   for (size_t i = 0; i < len; ++i) items[i] = i;
