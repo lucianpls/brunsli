@@ -30,6 +30,11 @@
 #define BRUNSLI_DEBUG 1
 #endif
 
+// Implicitly disable logging for Release build
+#if (defined(NDEBUG) && !defined(BRUNSLI_DEBUG))
+#define BRUNSLI_DISABLE_LOG
+#endif
+
 #include "stdio.h"
 
 #include "./port.h"
