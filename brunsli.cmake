@@ -85,7 +85,7 @@ add_library(brunslienc SHARED
   ${BRUNSLI_ENC_SOURCES}
   ${BRUNSLI_ENC_HEADERS}
 )
-target_link_libraries(brunslidec
+target_link_libraries(brunslienc
   brotlienc
   brunslicommon
 )
@@ -186,7 +186,7 @@ endif()  # BRUNSLI_EMSCRIPTEN
 # Installation
 if(NOT BRUNSLI_EMSCRIPTEN)
   install(
-    TARGETS brunslidec-c brunslienc-c
+    TARGETS brunslidec-c brunslienc-c brunslidec brunslienc brunslicommon
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   )
