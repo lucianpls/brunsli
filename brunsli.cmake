@@ -50,10 +50,26 @@ file(GLOB BRUNSLI_ENC_HEADERS
 
 set(BRUNSLI_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/c/include")
 mark_as_advanced(BRUNSLI_INCLUDE_DIRS)
+set(BROTLI_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/brotli/c/include)
+mark_as_advanced(BROTLI_INCLUDE_DIRS)
+
+add_library(brunslicommon SHARED
+  ${BRUNSLI_COMMON_SOURCES}
+  ${BRUNSLI_COMMON_HEADERS}
+)
 
 add_library(brunslicommon-static STATIC
   ${BRUNSLI_COMMON_SOURCES}
   ${BRUNSLI_COMMON_HEADERS}
+)
+
+add_library(brunslidec SHARED
+  ${BRUNSLI_DEC_SOURCES}
+  ${BRUNSLI_DEC_HEADERS}
+)
+target_link_libraries(brunslidec
+  brotlidec
+  brunslicommon
 )
 
 add_library(brunslidec-static STATIC
@@ -65,6 +81,18 @@ target_link_libraries(brunslidec-static PRIVATE
   brunslicommon-static
 )
 
+add_library(brunslienc SHARED
+  ${BRUNSLI_ENC_SOURCES}
+  ${BRUNSLI_ENC_HEADERS}
+)
+target_link_libraries(brunslidec
+  brotlienc
+  brunslicommon
+)
+target_include_directories(brunslidec PUBLIC
+  ${BROTLI_INCLUDE_DIRS}
+)
+
 add_library(brunslienc-static STATIC
   ${BRUNSLI_ENC_SOURCES}
   ${BRUNSLI_ENC_HEADERS}
@@ -73,8 +101,12 @@ target_link_libraries(brunslienc-static PRIVATE
   brotlienc-static
   brunslicommon-static
 )
+target_include_directories(brunslienc PUBLIC
+  ${BROTLI_INCLUDE_DIRS}
+)
 
-set(BRUNSLI_LIBRARIES brunslicommon-static brunslidec-static brunslienc-static)
+
+set(BRUNSLI_LIBRARIES brunslicommon brunslienc brunslidec brunslicommon-static brunslidec-static brunslienc-static)
 
 if(NOT BRUNSLI_EMSCRIPTEN)
 add_library(brunslidec-c SHARED
