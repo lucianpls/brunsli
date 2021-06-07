@@ -20,7 +20,7 @@ typedef size_t (*JPEGOutputHook)(void* data, const uint8_t* buf, size_t len);
 
 // Output callback function with associated data.
 struct JPEGOutput {
-  JPEGOutput(JPEGOutputHook cb, void* data) : cb(cb), data(data) {}
+  JPEGOutput(JPEGOutputHook cb_, void* data_) : cb(cb_), data(data_) {}
   bool Write(const uint8_t* buf, size_t len) const {
     if (len == 0) return true;
     size_t bytes_written = cb(data, buf, len);
