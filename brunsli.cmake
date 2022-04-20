@@ -52,7 +52,7 @@ mark_as_advanced(BRUNSLI_INCLUDE_DIRS)
 set(BROTLI_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/brotli/c/include)
 mark_as_advanced(BROTLI_INCLUDE_DIRS)
 
-add_library(brunslicommon SHARED
+add_library(brunslicommon STATIC
   ${BRUNSLI_COMMON_SOURCES}
   ${BRUNSLI_COMMON_HEADERS}
 )
@@ -185,9 +185,10 @@ endif()  # BRUNSLI_EMSCRIPTEN
 # Installation
 if(NOT BRUNSLI_EMSCRIPTEN)
   install(
-    TARGETS brunslidec-c brunslienc-c brunslidec brunslienc brunslicommon
+    TARGETS brunslidec-c brunslienc-c
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
   )
 
   install(
