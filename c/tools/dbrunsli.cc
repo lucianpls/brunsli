@@ -16,8 +16,16 @@
 
 #if defined(BRUNSLI_EXPERIMENTAL_GROUPS)
 #include "../experimental/groups.h"
-#include <highwayhash/data_parallel.h>
 #endif
+
+#if defined(_WIN32)
+#define fopen ms_fopen
+static FILE* ms_fopen(const char* filename, const char* mode) {
+  FILE* result = 0;
+  fopen_s(&result, filename, mode);
+  return result;
+}
+#endif  /* WIN32 */
 
 size_t StringWriter(void* data, const uint8_t* buf, size_t count) {
   std::string* output = reinterpret_cast<std::string*>(data);
@@ -112,11 +120,8 @@ bool ProcessFile(const std::string& file_name,
 
 #if defined(BRUNSLI_EXPERIMENTAL_GROUPS)
     {
-      highwayhash::ThreadPool thread_pool(4);
-      brunsli::Executor executor = [&](const brunsli::Runnable& runnable,
-                                       size_t num_tasks) {
-        thread_pool.Run(0, num_tasks, runnable);
-      };
+      brunsli::ParallelExecutor pool(4);
+      brunsli::Executor executor = pool.getExecutor();
       ok = brunsli::DecodeGroups(input_data, input.size(), &jpg, 32, 128,
                                  &executor);
     }
