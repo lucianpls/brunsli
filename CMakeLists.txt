@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.11...4.20)
 
 project(BRUNSLI C CXX)
 
