@@ -261,6 +261,10 @@ bool ProcessMetaData(const uint8_t* data, size_t len, MetadataState* state,
         state->remaining_multibyte_length = marker_len - 2;
         uint8_t head[3] = {state->marker, state->length_hi, lo};
         auto* dest = (state->marker == 0xFE) ? &jpg->com_data : &jpg->app_data;
+        size_t delta = (state->marker == 0xFE) ? 0 : state->short_marker_count;
+        if (dest->size() - delta >= kBrunsliMultibyteMarkerLimit) {
+          return false;
+        }
         dest->emplace_back(head, head + 3);
         state->multibyte_sink = &dest->back();
         // Turn state machine to default state in case there is no payload in
@@ -1260,7 +1264,7 @@ Stage DecodeHeader(State* state, JPEGData* jpg) {
   }
 
   LeaveSection(&s.section);
-  return (jpg->version == 1) ? Stage::FALLBACK : Stage::SECTION;
+  return (jpg->version == kFallbackVersion) ? Stage::FALLBACK : Stage::SECTION;
 }
 
 static BrunsliStatus DecodeMetaDataSection(State* state, JPEGData* jpg) {
@@ -1748,9 +1752,11 @@ static BrunsliStatus DecodeQuantDataSection(State* state, JPEGData* jpg) {
       }
 
       case QuantDataState::UPDATE: {
-        if (jpg->quant[qs.i].precision != qs.data_precision) {
+        if (jpg->quant[qs.i].precision < qs.data_precision) {
           return suspend_bit_reader(BRUNSLI_INVALID_BRN);
         }
+        // jpg->quant[qs.i].precision > qs.data_precision means that original
+        // JPEG1 was inefficiently encoded.
         ++qs.i;
         qs.stage = QuantDataState::READ_STOCK;
         continue;
@@ -2060,8 +2066,8 @@ static Stage ParseSection(State* state) {
 
       case SectionHeaderState::READ_VALUE: {
         // No known varint tags on top level.
-        size_t dummy;
-        BrunsliStatus status = DecodeBase128(state, &dummy);
+        size_t sink;
+        BrunsliStatus status = DecodeBase128(state, &sink);
         if (status != BRUNSLI_OK) return Fail(state, status);
         result = Stage::SECTION;
         sh.stage = SectionHeaderState::DONE;
